@@ -52,7 +52,7 @@
         var hash = new L.Hash(map);
         map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
         var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
-        // remove popup's row if "visible-with-data"
+        
         function removeEmptyRowsFromPopupContent(content, feature) {
          var tempDiv = document.createElement('div');
          tempDiv.innerHTML = content;
@@ -66,7 +66,7 @@
          }
          return tempDiv.innerHTML;
         }
-        // modify popup if contains media
+
         function addClassToPopupIfMedia(content, popup) {
             var tempDiv = document.createElement('div');
             tempDiv.innerHTML = content;
@@ -75,37 +75,24 @@
                 var src = imgTd.getAttribute('src');
                 if (/\.(jpg|jpeg|png|gif|bmp|webp|avif)$/i.test(src)) {
                     popup._contentNode.classList.add('media');
-                    setTimeout(function() {
-                        popup.update();
-                    }, 10);
+                    setTimeout(function() { popup.update(); }, 10);
                 } else if (/\.(mp3|wav|ogg|aac)$/i.test(src)) {
                     var audio = document.createElement('audio');
                     audio.controls = true;
                     audio.src = src;
                     imgTd.parentNode.replaceChild(audio, imgTd);
                     popup._contentNode.classList.add('media');
-                    setTimeout(function() {
-                        popup.setContent(tempDiv.innerHTML);
-                        popup.update();
-                    }, 10);
+                    setTimeout(function() { popup.setContent(tempDiv.innerHTML); popup.update(); }, 10);
                 } else if (/\.(mp4|webm|ogg|mov)$/i.test(src)) {
                     var video = document.createElement('video');
                     video.controls = true;
                     video.src = src;
                     video.style.width = "400px";
                     video.style.height = "300px";
-                    video.style.maxHeight = "60vh";
-                    video.style.maxWidth = "60vw";
                     imgTd.parentNode.replaceChild(video, imgTd);
                     popup._contentNode.classList.add('media');
-                    // Aggiorna il popup quando il video carica i metadati
-                    video.addEventListener('loadedmetadata', function() {
-                        popup.update();
-                    });
-                    setTimeout(function() {
-                        popup.setContent(tempDiv.innerHTML);
-                        popup.update();
-                    }, 10);
+                    video.addEventListener('loadedmetadata', function() { popup.update(); });
+                    setTimeout(function() { popup.setContent(tempDiv.innerHTML); popup.update(); }, 10);
                 } else {
                     popup._contentNode.classList.remove('media');
                 }
@@ -113,12 +100,14 @@
                 popup._contentNode.classList.remove('media');
             }
         }
+
         var zoomControl = L.control.zoom({
             position: 'topleft'
         }).addTo(map);
         var bounds_group = new L.featureGroup([]);
-        function setBounds() {
-        }
+        function setBounds() {}
+
+        // --- LAYER SATELLITE ---
         map.createPane('pane_GoogleSatelliteHybrid_0');
         map.getPane('pane_GoogleSatelliteHybrid_0').style.zIndex = 400;
         var layer_GoogleSatelliteHybrid_0 = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
@@ -128,46 +117,22 @@
             minZoom: 1,
             maxZoom: 28,
         });
-        layer_GoogleSatelliteHybrid_0;
         map.addLayer(layer_GoogleSatelliteHybrid_0);
+
+        // --- POPUP & STYLE LOT_1 ---
         function pop_LOT_1(feature, layer) {
             layer.on({
-                mouseout: function(e) {
-                    if (typeof layer.closePopup == 'function') {
-                        layer.closePopup();
-                    } else {
-                        layer.eachLayer(function(feature){
-                            feature.closePopup()
-                        });
-                    }
-                },
+                mouseout: function(e) { if (typeof layer.closePopup == 'function') { layer.closePopup(); } },
                 mouseover: highlightFeature,
             });
             var popupContent = '<table>\
-                    <tr>\
-                        <td colspan="2">' + (feature.properties['FID'] !== null ? autolinker.link(String(feature.properties['FID']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <td class="visible-with-data" id="NO_LOT" colspan="2"><strong>NO_LOT</strong><br />' + (feature.properties['NO_LOT'] !== null ? autolinker.link(String(feature.properties['NO_LOT']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <td colspan="2">' + (feature.properties['AREA'] !== null ? autolinker.link(String(feature.properties['AREA']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <td colspan="2">' + (feature.properties['tsp — hak milik_DAERAH'] !== null ? autolinker.link(String(feature.properties['tsp — hak milik_DAERAH']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <td colspan="2">' + (feature.properties['tsp — hak milik_NO_PA'] !== null ? autolinker.link(String(feature.properties['tsp — hak milik_NO_PA']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <td colspan="2">' + (feature.properties['tsp — pemilik_PEMILIK'] !== null ? autolinker.link(String(feature.properties['tsp — pemilik_PEMILIK']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
+                    <tr><td colspan="2">' + (feature.properties['FID'] !== null ? autolinker.link(String(feature.properties['FID']).toLocaleString()) : '') + '</td></tr>\
+                    <tr><td class="visible-with-data" id="NO_LOT" colspan="2"><strong>NO_LOT</strong><br />' + (feature.properties['NO_LOT'] !== null ? autolinker.link(String(feature.properties['NO_LOT']).toLocaleString()) : '') + '</td></tr>\
+                    <tr><td colspan="2">' + (feature.properties['AREA'] !== null ? autolinker.link(String(feature.properties['AREA']).toLocaleString()) : '') + '</td></tr>\
                 </table>';
             var content = removeEmptyRowsFromPopupContent(popupContent, feature);
-			layer.on('popupopen', function(e) {
-				addClassToPopupIfMedia(content, e.popup);
-			});
-			layer.bindPopup(content, { maxHeight: 400 });
+            layer.on('popupopen', function(e) { addClassToPopupIfMedia(content, e.popup); });
+            layer.bindPopup(content, { maxHeight: 400 });
         }
 
         function style_LOT_1_0() {
@@ -175,9 +140,6 @@
                 pane: 'pane_LOT_1',
                 opacity: 1,
                 color: 'rgba(35,35,35,1.0)',
-                dashArray: '',
-                lineCap: 'butt',
-                lineJoin: 'miter',
                 weight: 1.0, 
                 fill: true,
                 fillOpacity: 1,
@@ -187,56 +149,27 @@
         }
         map.createPane('pane_LOT_1');
         map.getPane('pane_LOT_1').style.zIndex = 401;
-        map.getPane('pane_LOT_1').style['mix-blend-mode'] = 'normal';
         var layer_LOT_1 = new L.geoJson(json_LOT_1, {
-            attribution: '',
-            interactive: true,
-            dataVar: 'json_LOT_1',
-            layerName: 'layer_LOT_1',
             pane: 'pane_LOT_1',
             onEachFeature: pop_LOT_1,
             style: style_LOT_1_0,
         });
         bounds_group.addLayer(layer_LOT_1);
         map.addLayer(layer_LOT_1);
+
+        // --- POPUP & STYLE lotfinaltest_2 ---
         function pop_lotfinaltest_2(feature, layer) {
             layer.on({
-                mouseout: function(e) {
-                    if (typeof layer.closePopup == 'function') {
-                        layer.closePopup();
-                    } else {
-                        layer.eachLayer(function(feature){
-                            feature.closePopup()
-                        });
-                    }
-                },
+                mouseout: function(e) { if (typeof layer.closePopup == 'function') { layer.closePopup(); } },
                 mouseover: highlightFeature,
             });
             var popupContent = '<table>\
-                    <tr>\
-                        <td colspan="2">' + (feature.properties['FID'] !== null ? autolinker.link(String(feature.properties['FID']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <td class="visible-with-data" id="NO_LOT" colspan="2"><strong>NO_LOT</strong><br />' + (feature.properties['NO_LOT'] !== null ? autolinker.link(String(feature.properties['NO_LOT']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <td colspan="2">' + (feature.properties['AREA'] !== null ? autolinker.link(String(feature.properties['AREA']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <td colspan="2">' + (feature.properties['tsp — ha'] !== null ? autolinker.link(String(feature.properties['tsp — ha']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <td colspan="2">' + (feature.properties['tsp — _1'] !== null ? autolinker.link(String(feature.properties['tsp — _1']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <td colspan="2">' + (feature.properties['tsp — pe'] !== null ? autolinker.link(String(feature.properties['tsp — pe']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
+                    <tr><td colspan="2">' + (feature.properties['FID'] !== null ? autolinker.link(String(feature.properties['FID']).toLocaleString()) : '') + '</td></tr>\
+                    <tr><td class="visible-with-data" id="NO_LOT" colspan="2"><strong>NO_LOT</strong><br />' + (feature.properties['NO_LOT'] !== null ? autolinker.link(String(feature.properties['NO_LOT']).toLocaleString()) : '') + '</td></tr>\
                 </table>';
             var content = removeEmptyRowsFromPopupContent(popupContent, feature);
-			layer.on('popupopen', function(e) {
-				addClassToPopupIfMedia(content, e.popup);
-			});
-			layer.bindPopup(content, { maxHeight: 400 });
+            layer.on('popupopen', function(e) { addClassToPopupIfMedia(content, e.popup); });
+            layer.bindPopup(content, { maxHeight: 400 });
         }
 
         function style_lotfinaltest_2_0() {
@@ -244,9 +177,6 @@
                 pane: 'pane_lotfinaltest_2',
                 opacity: 1,
                 color: 'rgba(35,35,35,1.0)',
-                dashArray: '',
-                lineCap: 'butt',
-                lineJoin: 'miter',
                 weight: 1.0, 
                 fill: true,
                 fillOpacity: 1,
@@ -256,63 +186,26 @@
         }
         map.createPane('pane_lotfinaltest_2');
         map.getPane('pane_lotfinaltest_2').style.zIndex = 402;
-        map.getPane('pane_lotfinaltest_2').style['mix-blend-mode'] = 'normal';
         var layer_lotfinaltest_2 = new L.geoJson(json_lotfinaltest_2, {
-            attribution: '',
-            interactive: true,
-            dataVar: 'json_lotfinaltest_2',
-            layerName: 'layer_lotfinaltest_2',
             pane: 'pane_lotfinaltest_2',
             onEachFeature: pop_lotfinaltest_2,
             style: style_lotfinaltest_2_0,
         });
         bounds_group.addLayer(layer_lotfinaltest_2);
         map.addLayer(layer_lotfinaltest_2);
+
+        // --- POPUP & STYLE TANDA_SEMPADAN_3 ---
         function pop_TANDA_SEMPADAN_3(feature, layer) {
             layer.on({
-                mouseout: function(e) {
-                    if (typeof layer.closePopup == 'function') {
-                        layer.closePopup();
-                    } else {
-                        layer.eachLayer(function(feature){
-                            feature.closePopup()
-                        });
-                    }
-                },
+                mouseout: function(e) { if (typeof layer.closePopup == 'function') { layer.closePopup(); } },
                 mouseover: highlightFeature,
             });
             var popupContent = '<table>\
-                    <tr>\
-                        <th scope="row">vertex_ind</th>\
-                        <td>' + (feature.properties['vertex_ind'] !== null ? autolinker.link(String(feature.properties['vertex_ind']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <td colspan="2">' + (feature.properties['vertex_par'] !== null ? autolinker.link(String(feature.properties['vertex_par']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <td colspan="2">' + (feature.properties['vertex_p_1'] !== null ? autolinker.link(String(feature.properties['vertex_p_1']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <td colspan="2">' + (feature.properties['vertex_p_2'] !== null ? autolinker.link(String(feature.properties['vertex_p_2']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <td colspan="2">' + (feature.properties['distance'] !== null ? autolinker.link(String(feature.properties['distance']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <td colspan="2">' + (feature.properties['angle'] !== null ? autolinker.link(String(feature.properties['angle']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <td colspan="2">' + (feature.properties['x'] !== null ? autolinker.link(String(feature.properties['x']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <td colspan="2">' + (feature.properties['y'] !== null ? autolinker.link(String(feature.properties['y']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
+                    <tr><th scope="row">vertex_ind</th><td>' + (feature.properties['vertex_ind'] !== null ? autolinker.link(String(feature.properties['vertex_ind']).toLocaleString()) : '') + '</td></tr>\
                 </table>';
             var content = removeEmptyRowsFromPopupContent(popupContent, feature);
-			layer.on('popupopen', function(e) {
-				addClassToPopupIfMedia(content, e.popup);
-			});
-			layer.bindPopup(content, { maxHeight: 400 });
+            layer.on('popupopen', function(e) { addClassToPopupIfMedia(content, e.popup); });
+            layer.bindPopup(content, { maxHeight: 400 });
         }
 
         function style_TANDA_SEMPADAN_3_0() {
@@ -321,9 +214,6 @@
                 radius: 4.0,
                 opacity: 1,
                 color: 'rgba(35,35,35,1.0)',
-                dashArray: '',
-                lineCap: 'butt',
-                lineJoin: 'miter',
                 weight: 1,
                 fill: true,
                 fillOpacity: 1,
@@ -333,58 +223,48 @@
         }
         map.createPane('pane_TANDA_SEMPADAN_3');
         map.getPane('pane_TANDA_SEMPADAN_3').style.zIndex = 403;
-        map.getPane('pane_TANDA_SEMPADAN_3').style['mix-blend-mode'] = 'normal';
         var layer_TANDA_SEMPADAN_3 = new L.geoJson(json_TANDA_SEMPADAN_3, {
-            attribution: '',
-            interactive: true,
-            dataVar: 'json_TANDA_SEMPADAN_3',
-            layerName: 'layer_TANDA_SEMPADAN_3',
             pane: 'pane_TANDA_SEMPADAN_3',
             onEachFeature: pop_TANDA_SEMPADAN_3,
             pointToLayer: function (feature, latlng) {
-                var context = {
-                    feature: feature,
-                    variables: {}
-                };
                 return L.circleMarker(latlng, style_TANDA_SEMPADAN_3_0(feature));
             },
         });
         bounds_group.addLayer(layer_TANDA_SEMPADAN_3);
         map.addLayer(layer_TANDA_SEMPADAN_3);
+
+        // --- BUTTON ON/OFF LAYER (BARU) ---
+        var baseMaps = {
+            "Google Satellite": layer_GoogleSatelliteHybrid_0
+        };
+        var overlayMaps = {
+            "Lot Tanah": layer_LOT_1,
+            "Lot Final Test": layer_lotfinaltest_2,
+            "Tanda Sempadan": layer_TANDA_SEMPADAN_3
+        };
+        L.control.layers(baseMaps, overlayMaps).addTo(map);
+
         setBounds();
         var i = 0;
         layer_LOT_1.eachLayer(function(layer) {
-            var context = {
-                feature: layer.feature,
-                variables: {}
-            };
             layer.bindTooltip((layer.feature.properties['NO_LOT'] !== null?String('<div style="color: #323232; font-size: 10pt; font-family: \'Arial\', sans-serif;">' + layer.feature.properties['NO_LOT']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_LOT_1'});
             labels.push(layer);
-            totalMarkers += 1;
-              layer.added = true;
-              addLabel(layer, i);
-              i++;
+            addLabel(layer, i);
+            i++;
         });
+
         map.addControl(new L.Control.Search({
             layer: layer_lotfinaltest_2,
             initial: false,
             hideMarkerOnCollapse: true,
             propertyName: 'NO_LOT'}));
-        if (typeof url === 'undefined') {
-            document.getElementsByClassName('search-button')[0].className += ' fa fa-binoculars';
-        } else {
-            document.getElementsByClassName('search-button')[1].className += ' fa fa-binoculars';
-        }
+
+        document.getElementsByClassName('search-button')[0].className += ' fa fa-binoculars';
+
         resetLabels([layer_LOT_1]);
-        map.on("zoomend", function(){
-            resetLabels([layer_LOT_1]);
-        });
-        map.on("layeradd", function(){
-            resetLabels([layer_LOT_1]);
-        });
-        map.on("layerremove", function(){
-            resetLabels([layer_LOT_1]);
-        });
+        map.on("zoomend", function(){ resetLabels([layer_LOT_1]); });
+        map.on("layeradd", function(){ resetLabels([layer_LOT_1]); });
+        map.on("layerremove", function(){ resetLabels([layer_LOT_1]); });
         </script>        
     </body>
 </html>

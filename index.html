@@ -13,18 +13,66 @@
         <link rel="stylesheet" href="css/leaflet-search.css">
         <link rel="stylesheet" href="css/leaflet.photon.css">
         <style>
-        html, body, #map {
+        html, body {
             width: 100%;
             height: 100%;
             padding: 0;
             margin: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        /* Header styling */
+        #header {
+            width: 100%;
+            background-color: white;
+            text-align: center;
+            padding: 10px 0;
+            font-weight: bold;
+            font-size: 24px;
+            border-bottom: 2px solid #ccc;
+            font-family: Arial, sans-serif;
+        }
+        /* Container for sidebar and map */
+        #main-container {
+            display: flex;
+            flex: 1;
+            width: 100%;
+        }
+        /* Sidebar styling */
+        #sidebar {
+            width: 250px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-right: 1px solid #ddd;
+            font-family: Arial, sans-serif;
+        }
+        #map {
+            flex: 1;
+            height: 100%;
+        }
+        .select-box {
+            width: 100%;
+            padding: 8px;
+            margin-top: 10px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
         }
         </style>
-        <title></title>
+        <title>Kawasan Perumahan</title>
     </head>
     <body>
-        <div id="map">
+        <div id="header">KAWASAN PERUMAHAN</div>
+        
+        <div id="main-container">
+            <div id="sidebar">
+                <strong>Cari No. Lot:</strong>
+                <select id="selectLot" class="select-box" onchange="zoomToLot(this.value)">
+                    <option value="">-- Pilih No Lot --</option>
+                </select>
+            </div>
+            <div id="map"></div>
         </div>
+
         <script src="js/qgis2web_expressions.js"></script>
         <script src="js/leaflet.js"></script>
         <script src="js/L.Control.Layers.Tree.min.js"></script>
@@ -40,6 +88,7 @@
         <script src="data/LOT_1.js"></script>
         <script src="data/lotfinaltest_2.js"></script>
         <script src="data/TANDA_SEMPADAN_3.js"></script>
+        
         <script>
         var highlightLayer;
         function highlightFeature(e) {
@@ -49,63 +98,10 @@
         var map = L.map('map', {
             zoomControl:false, maxZoom:28, minZoom:1
         }).fitBounds([[2.1034521062399696,102.52110551111741],[2.1040268754557534,102.52208302310447]]);
-        var hash = new L.Hash(map);
-        map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
-        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
         
-        function removeEmptyRowsFromPopupContent(content, feature) {
-         var tempDiv = document.createElement('div');
-         tempDiv.innerHTML = content;
-         var rows = tempDiv.querySelectorAll('tr');
-         for (var i = 0; i < rows.length; i++) {
-             var td = rows[i].querySelector('td.visible-with-data');
-             var key = td ? td.id : '';
-             if (td && td.classList.contains('visible-with-data') && feature.properties[key] == null) {
-                 rows[i].parentNode.removeChild(rows[i]);
-             }
-         }
-         return tempDiv.innerHTML;
-        }
-
-        function addClassToPopupIfMedia(content, popup) {
-            var tempDiv = document.createElement('div');
-            tempDiv.innerHTML = content;
-            var imgTd = tempDiv.querySelector('td img');
-            if (imgTd) {
-                var src = imgTd.getAttribute('src');
-                if (/\.(jpg|jpeg|png|gif|bmp|webp|avif)$/i.test(src)) {
-                    popup._contentNode.classList.add('media');
-                    setTimeout(function() { popup.update(); }, 10);
-                } else if (/\.(mp3|wav|ogg|aac)$/i.test(src)) {
-                    var audio = document.createElement('audio');
-                    audio.controls = true;
-                    audio.src = src;
-                    imgTd.parentNode.replaceChild(audio, imgTd);
-                    popup._contentNode.classList.add('media');
-                    setTimeout(function() { popup.setContent(tempDiv.innerHTML); popup.update(); }, 10);
-                } else if (/\.(mp4|webm|ogg|mov)$/i.test(src)) {
-                    var video = document.createElement('video');
-                    video.controls = true;
-                    video.src = src;
-                    video.style.width = "400px";
-                    video.style.height = "300px";
-                    imgTd.parentNode.replaceChild(video, imgTd);
-                    popup._contentNode.classList.add('media');
-                    video.addEventListener('loadedmetadata', function() { popup.update(); });
-                    setTimeout(function() { popup.setContent(tempDiv.innerHTML); popup.update(); }, 10);
-                } else {
-                    popup._contentNode.classList.remove('media');
-                }
-            } else {
-                popup._contentNode.classList.remove('media');
-            }
-        }
-
-        var zoomControl = L.control.zoom({
-            position: 'topleft'
-        }).addTo(map);
-        var bounds_group = new L.featureGroup([]);
-        function setBounds() {}
+        var hash = new L.Hash(map);
+        map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com">Leaflet</a>');
+        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
 
         // --- LAYER SATELLITE ---
         map.createPane('pane_GoogleSatelliteHybrid_0');
@@ -113,26 +109,23 @@
         var layer_GoogleSatelliteHybrid_0 = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
             pane: 'pane_GoogleSatelliteHybrid_0',
             opacity: 1.0,
-            attribution: '',
-            minZoom: 1,
             maxZoom: 28,
         });
         map.addLayer(layer_GoogleSatelliteHybrid_0);
 
-        // --- POPUP & STYLE LOT_1 ---
-        function pop_LOT_1(feature, layer) {
-            layer.on({
-                mouseout: function(e) { if (typeof layer.closePopup == 'function') { layer.closePopup(); } },
-                mouseover: highlightFeature,
-            });
-            var popupContent = '<table>\
-                    <tr><td colspan="2">' + (feature.properties['FID'] !== null ? autolinker.link(String(feature.properties['FID']).toLocaleString()) : '') + '</td></tr>\
-                    <tr><td class="visible-with-data" id="NO_LOT" colspan="2"><strong>NO_LOT</strong><br />' + (feature.properties['NO_LOT'] !== null ? autolinker.link(String(feature.properties['NO_LOT']).toLocaleString()) : '') + '</td></tr>\
-                    <tr><td colspan="2">' + (feature.properties['AREA'] !== null ? autolinker.link(String(feature.properties['AREA']).toLocaleString()) : '') + '</td></tr>\
-                </table>';
-            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
-            layer.on('popupopen', function(e) { addClassToPopupIfMedia(content, e.popup); });
-            layer.bindPopup(content, { maxHeight: 400 });
+        // --- POPUP & STYLE ---
+        function removeEmptyRowsFromPopupContent(content, feature) {
+            var tempDiv = document.createElement('div');
+            tempDiv.innerHTML = content;
+            var rows = tempDiv.querySelectorAll('tr');
+            for (var i = 0; i < rows.length; i++) {
+                var td = rows[i].querySelector('td.visible-with-data');
+                var key = td ? td.id : '';
+                if (td && td.classList.contains('visible-with-data') && feature.properties[key] == null) {
+                    rows[i].parentNode.removeChild(rows[i]);
+                }
+            }
+            return tempDiv.innerHTML;
         }
 
         function style_LOT_1_0() {
@@ -142,129 +135,61 @@
                 color: 'rgba(35,35,35,1.0)',
                 weight: 1.0, 
                 fill: true,
-                fillOpacity: 1,
+                fillOpacity: 0.6,
                 fillColor: 'rgba(152,125,183,1.0)',
                 interactive: true,
             }
         }
+
         map.createPane('pane_LOT_1');
         map.getPane('pane_LOT_1').style.zIndex = 401;
         var layer_LOT_1 = new L.geoJson(json_LOT_1, {
             pane: 'pane_LOT_1',
-            onEachFeature: pop_LOT_1,
             style: style_LOT_1_0,
+            onEachFeature: function(feature, layer) {
+                var popupContent = '<table><tr><td colspan="2"><strong>No Lot: </strong>' + (feature.properties['NO_LOT'] || 'N/A') + '</td></tr></table>';
+                layer.bindPopup(popupContent);
+            }
         });
-        bounds_group.addLayer(layer_LOT_1);
         map.addLayer(layer_LOT_1);
 
-        // --- POPUP & STYLE lotfinaltest_2 ---
-        function pop_lotfinaltest_2(feature, layer) {
-            layer.on({
-                mouseout: function(e) { if (typeof layer.closePopup == 'function') { layer.closePopup(); } },
-                mouseover: highlightFeature,
-            });
-            var popupContent = '<table>\
-                    <tr><td colspan="2">' + (feature.properties['FID'] !== null ? autolinker.link(String(feature.properties['FID']).toLocaleString()) : '') + '</td></tr>\
-                    <tr><td class="visible-with-data" id="NO_LOT" colspan="2"><strong>NO_LOT</strong><br />' + (feature.properties['NO_LOT'] !== null ? autolinker.link(String(feature.properties['NO_LOT']).toLocaleString()) : '') + '</td></tr>\
-                </table>';
-            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
-            layer.on('popupopen', function(e) { addClassToPopupIfMedia(content, e.popup); });
-            layer.bindPopup(content, { maxHeight: 400 });
-        }
+        // --- DATA UNTUK DROPDOWN & ZOOM ---
+        var layer_lotfinaltest_2 = new L.geoJson(json_lotfinaltest_2);
+        
+        // Isi dropdown secara automatik dari data lotfinaltest_2
+        var select = document.getElementById("selectLot");
+        var lotFeatures = json_lotfinaltest_2.features;
+        
+        // Susun nombor lot mengikut turutan
+        lotFeatures.sort((a, b) => (a.properties.NO_LOT > b.properties.NO_LOT) ? 1 : -1);
 
-        function style_lotfinaltest_2_0() {
-            return {
-                pane: 'pane_lotfinaltest_2',
-                opacity: 1,
-                color: 'rgba(35,35,35,1.0)',
-                weight: 1.0, 
-                fill: true,
-                fillOpacity: 1,
-                fillColor: 'rgba(152,125,183,1.0)',
-                interactive: true,
+        lotFeatures.forEach(function(feature) {
+            if (feature.properties.NO_LOT) {
+                var el = document.createElement("option");
+                el.textContent = feature.properties.NO_LOT;
+                el.value = feature.properties.NO_LOT;
+                select.appendChild(el);
             }
-        }
-        map.createPane('pane_lotfinaltest_2');
-        map.getPane('pane_lotfinaltest_2').style.zIndex = 402;
-        var layer_lotfinaltest_2 = new L.geoJson(json_lotfinaltest_2, {
-            pane: 'pane_lotfinaltest_2',
-            onEachFeature: pop_lotfinaltest_2,
-            style: style_lotfinaltest_2_0,
         });
-        bounds_group.addLayer(layer_lotfinaltest_2);
-        map.addLayer(layer_lotfinaltest_2);
 
-        // --- POPUP & STYLE TANDA_SEMPADAN_3 ---
-        function pop_TANDA_SEMPADAN_3(feature, layer) {
-            layer.on({
-                mouseout: function(e) { if (typeof layer.closePopup == 'function') { layer.closePopup(); } },
-                mouseover: highlightFeature,
+        // Fungsi untuk zoom bila lot dipilih
+        function zoomToLot(lotNo) {
+            if (lotNo === "") return;
+            layer_LOT_1.eachLayer(function(layer) {
+                if (layer.feature.properties.NO_LOT == lotNo) {
+                    map.fitBounds(layer.getBounds());
+                    layer.openPopup();
+                }
             });
-            var popupContent = '<table>\
-                    <tr><th scope="row">vertex_ind</th><td>' + (feature.properties['vertex_ind'] !== null ? autolinker.link(String(feature.properties['vertex_ind']).toLocaleString()) : '') + '</td></tr>\
-                </table>';
-            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
-            layer.on('popupopen', function(e) { addClassToPopupIfMedia(content, e.popup); });
-            layer.bindPopup(content, { maxHeight: 400 });
         }
 
-        function style_TANDA_SEMPADAN_3_0() {
-            return {
-                pane: 'pane_TANDA_SEMPADAN_3',
-                radius: 4.0,
-                opacity: 1,
-                color: 'rgba(35,35,35,1.0)',
-                weight: 1,
-                fill: true,
-                fillOpacity: 1,
-                fillColor: 'rgba(232,113,141,1.0)',
-                interactive: true,
-            }
-        }
-        map.createPane('pane_TANDA_SEMPADAN_3');
-        map.getPane('pane_TANDA_SEMPADAN_3').style.zIndex = 403;
-        var layer_TANDA_SEMPADAN_3 = new L.geoJson(json_TANDA_SEMPADAN_3, {
-            pane: 'pane_TANDA_SEMPADAN_3',
-            onEachFeature: pop_TANDA_SEMPADAN_3,
-            pointToLayer: function (feature, latlng) {
-                return L.circleMarker(latlng, style_TANDA_SEMPADAN_3_0(feature));
-            },
-        });
-        bounds_group.addLayer(layer_TANDA_SEMPADAN_3);
-        map.addLayer(layer_TANDA_SEMPADAN_3);
-
-        // --- BUTTON ON/OFF LAYER (BARU) ---
-        var baseMaps = {
-            "Google Satellite": layer_GoogleSatelliteHybrid_0
-        };
-        var overlayMaps = {
-            "Lot Tanah": layer_LOT_1,
-            "Lot Final Test": layer_lotfinaltest_2,
-            "Tanda Sempadan": layer_TANDA_SEMPADAN_3
-        };
+        // --- TAMBAH CONTROLS ---
+        L.control.zoom({ position: 'topleft' }).addTo(map);
+        
+        var baseMaps = { "Google Satellite": layer_GoogleSatelliteHybrid_0 };
+        var overlayMaps = { "Lot Tanah": layer_LOT_1 };
         L.control.layers(baseMaps, overlayMaps).addTo(map);
 
-        setBounds();
-        var i = 0;
-        layer_LOT_1.eachLayer(function(layer) {
-            layer.bindTooltip((layer.feature.properties['NO_LOT'] !== null?String('<div style="color: #323232; font-size: 10pt; font-family: \'Arial\', sans-serif;">' + layer.feature.properties['NO_LOT']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_LOT_1'});
-            labels.push(layer);
-            addLabel(layer, i);
-            i++;
-        });
-
-        map.addControl(new L.Control.Search({
-            layer: layer_lotfinaltest_2,
-            initial: false,
-            hideMarkerOnCollapse: true,
-            propertyName: 'NO_LOT'}));
-
-        document.getElementsByClassName('search-button')[0].className += ' fa fa-binoculars';
-
-        resetLabels([layer_LOT_1]);
-        map.on("zoomend", function(){ resetLabels([layer_LOT_1]); });
-        map.on("layeradd", function(){ resetLabels([layer_LOT_1]); });
-        map.on("layerremove", function(){ resetLabels([layer_LOT_1]); });
-        </script>        
+        </script>
     </body>
 </html>

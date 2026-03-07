@@ -283,7 +283,8 @@
             });
             var popupContent = '<table>\
                     <tr>\
-                        <td colspan="2">' + (feature.properties['vertex_ind'] !== null ? autolinker.link(String(feature.properties['vertex_ind']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                        <th scope="row">vertex_ind</th>\
+                        <td>' + (feature.properties['vertex_ind'] !== null ? autolinker.link(String(feature.properties['vertex_ind']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
                     </tr>\
                     <tr>\
                         <td colspan="2">' + (feature.properties['vertex_par'] !== null ? autolinker.link(String(feature.properties['vertex_par']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\

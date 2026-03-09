@@ -5,166 +5,152 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
         <link rel="stylesheet" href="css/leaflet.css">
-        <link rel="stylesheet" href="css/L.Control.Layers.Tree.css">
         <link rel="stylesheet" href="css/qgis2web.css">
         <link rel="stylesheet" href="css/fontawesome-all.min.css">
-        <link rel="stylesheet" href="css/leaflet-search.css">
         <style>
-        html, body {
-            width: 100%;
-            height: 100%;
-            padding: 0;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-        }
-        /* Header styling */
-        #header {
-            width: 100%;
-            background-color: white;
-            text-align: center;
-            padding: 10px 0;
-            font-weight: bold;
-            font-size: 24px;
-            border-bottom: 2px solid #ccc;
-            font-family: Arial, sans-serif;
-        }
-        /* Container untuk Sidebar & Peta */
-        #main-container {
-            display: flex;
-            flex: 1;
-            width: 100%;
-        }
-        /* Sidebar styling */
-        #sidebar {
-            width: 250px;
-            padding: 20px;
-            background-color: #f8f9fa;
-            border-right: 1px solid #ddd;
-            font-family: Arial, sans-serif;
-            z-index: 1000;
-        }
-        #map {
-            flex: 1;
-            height: 100%;
-        }
-        .select-box {
-            width: 100%;
-            padding: 8px;
-            margin-top: 10px;
-            border-radius: 4px;
-            border: 1px solid #ccc;
-        }
+        html, body { width: 100%; height: 100%; padding: 0; margin: 0; display: flex; flex-direction: column; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #1a1c23; }
         
-        /* Gaya untuk Label Butiran (Tooltip) */
-        .custom-tooltip {
-            background-color: white !important;
-            border: 1px solid #333 !important;
-            padding: 10px !important;
-            font-size: 12px !important;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3) !important;
-        }
+        /* Header Hijau seperti dalam gambar */
+        #header { width: 100%; background-color: #2d5a27; color: white; text-align: center; padding: 15px 0; font-size: 20px; font-style: italic; display: flex; align-items: center; justify-content: center; border-bottom: 2px solid #3d7a35; }
+        #header img { height: 30px; margin-right: 10px; background: white; padding: 2px; border-radius: 3px; }
+
+        #main-container { display: flex; flex: 1; width: 100%; overflow: hidden; }
+        #map { flex: 1; height: 100%; }
+
+        /* Sidebar di sebelah kanan (Dark Theme) */
+        #sidebar { width: 300px; background-color: #242933; color: #ffffff; padding: 20px; display: flex; flex-direction: column; border-left: 1px solid #3b4252; box-shadow: -2px 0 5px rgba(0,0,0,0.3); }
+        
+        .section-title { font-size: 14px; font-weight: bold; margin-bottom: 15px; display: flex; align-items: center; }
+        .section-title i { margin-right: 8px; color: #4facfe; }
+
+        /* Input & Butang */
+        .select-box { width: 100%; padding: 10px; background: #3b4252; border: 1px solid #4c566a; color: white; border-radius: 5px; margin-bottom: 10px; }
+        .btn { width: 100%; padding: 10px; border: none; border-radius: 5px; color: white; font-weight: bold; cursor: pointer; margin-bottom: 10px; transition: 0.3s; }
+        .btn-search { background-color: #2d8a39; } /* Hijau */
+        .btn-reset { background-color: #c0392b; } /* Merah */
+        .btn-export { background-color: #0984e3; display: flex; align-items: center; justify-content: center; } /* Biru */
+        .btn:hover { opacity: 0.8; }
+
+        /* Maklumat Dashboard di Sidebar */
+        .info-card { background: #1a1c23; padding: 12px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #2d8a39; }
+        .info-label { font-size: 11px; color: #818996; text-transform: uppercase; margin-bottom: 4px; }
+        .info-value { font-size: 16px; font-weight: bold; color: #2ecc71; }
+
+        /* Tooltip style */
+        .custom-tooltip { background: white !important; border-radius: 5px !important; border: none !important; box-shadow: 0 2px 10px rgba(0,0,0,0.5) !important; padding: 10px !important; color: #333 !important; }
         </style>
-        <title>Taman Perumahan</title>
+        <title>Smart Resident</title>
     </head>
     <body>
-        <div id="header">TAMAN PERUMAHAN</div>
+        <div id="header">
+            <span>smart resident</span>
+        </div>
         
         <div id="main-container">
+            <div id="map"></div>
+            
             <div id="sidebar">
-                <strong>Cari No. Lot:</strong>
-                <select id="selectLot" class="select-box" onchange="zoomToLot(this.value)">
+                <div class="section-title"><i class="fas fa-cog"></i> Tetapan Paparan</div>
+                <div class="section-title"><i class="fas fa-globe"></i> Land Explorer</div>
+                
+                <select id="selectLot" class="select-box">
                     <option value="">-- Pilih No Lot --</option>
                 </select>
+
+                <button class="btn btn-search" onclick="doSearch()">Cari Lot</button>
+                <button class="btn btn-reset" onclick="resetMap()">Reset Peta</button>
+                <button class="btn btn-export"><i class="fas fa-file-pdf" style="margin-right:8px;"></i> Export Detail + Map (PDF)</button>
+
+                <div class="info-card">
+                    <div class="info-label">TOTAL LOT</div>
+                    <div id="total-lot" class="info-value">70</div>
+                </div>
+                <div class="info-card">
+                    <div class="info-label">NO LOT DIPILIH</div>
+                    <div id="val-lot" class="info-value">-</div>
+                </div>
+                <div class="info-card">
+                    <div class="info-label">NAMA PEMILIK</div>
+                    <div id="val-nama" class="info-value">-</div>
+                </div>
+                <div class="info-card">
+                    <div class="info-label">LUAS LOT</div>
+                    <div id="val-luas" class="info-value">-</div>
+                </div>
             </div>
-            <div id="map"></div>
         </div>
 
-        <script src="js/qgis2web_expressions.js"></script>
         <script src="js/leaflet.js"></script>
-        <script src="js/L.Control.Layers.Tree.min.js"></script>
-        <script src="js/leaflet-hash.js"></script>
-        <script src="js/Autolinker.min.js"></script>
-        <script src="js/leaflet-search.js"></script>
-        
         <script src="data/LOT_1.js"></script>
         <script src="data/lotfinaltest_2.js"></script>
-        <script src="data/TANDA_SEMPADAN_3.js"></script>
 
         <script>
-        var map = L.map('map', {
-            zoomControl:false, maxZoom:28, minZoom:1
-        }).fitBounds([[2.103452, 102.521105],[2.104026, 102.522083]]);
+        var map = L.map('map', { zoomControl: true }).fitBounds([[2.10345, 102.52110],[2.10402, 102.52208]]);
+        
+        // Base Layer
+        L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}').addTo(map);
 
-        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+        // Style asal & Highlight
+        var defaultStyle = { color: '#232323', weight: 1, fillColor: '#987db7', fillOpacity: 0.6 };
+        var highlightStyle = { color: '#ffffff', weight: 3, fillColor: '#f1c40f', fillOpacity: 0.8 };
 
-        // 1. Layer Satelit
-        var layer_GoogleSatellite = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
-            maxZoom: 28,
-        }).addTo(map);
-
-        // Fungsi untuk susunan maklumat dalam label
-        function getPopupContent(f) {
-            return '<strong>FID:</strong> ' + (f['FID'] || '0') + '<br>' +
-                   '<strong>NO_LOT:</strong> ' + (f['NO_LOT'] || '-') + '<br>' +
-                   '<strong>AREA:</strong> ' + (f['AREA'] || '-') + '<br>' +
-                   '<strong>DAERAH:</strong> ' + (f['tsp — ha'] || 'TANGKAK') + '<br>' +
-                   '<strong>NO_PA:</strong> ' + (f['tsp — _1'] || '-') + '<br>' +
-                   '<strong>PEMILIK:</strong> ' + (f['tsp — pe'] || '-');
-        }
-
-        // 2. Layer Lot_1
-        var layer_LOT_1 = new L.geoJson(json_LOT_1, {
-            style: {
-                color: 'rgba(35,35,35,1.0)',
-                weight: 1.0,
-                fillColor: 'rgba(152,125,183,0.6)',
-                fillOpacity: 1,
-                interactive: true
-            },
+        var layer_LOT_1 = L.geoJson(json_LOT_1, {
+            style: defaultStyle,
             onEachFeature: function(feature, layer) {
-                var content = getPopupContent(feature.properties);
-                
-                // Muncul maklumat bila cursor lalu (Hover)
-                layer.bindTooltip(content, { sticky: true, className: 'custom-tooltip' });
-                
-                // Muncul maklumat bila klik
-                layer.bindPopup(content);
-                
-                // Efek Highlight
-                layer.on('mouseover', function() { this.setStyle({fillOpacity: 0.8, weight: 2, color: '#fff'}); });
-                layer.on('mouseout', function() { layer_LOT_1.resetStyle(this); });
+                // Tooltip Butiran (Hover)
+                var props = feature.properties;
+                var tooltipContent = "<strong>NO LOT:</strong> " + props.NO_LOT + "<br>" +
+                                     "<strong>PEMILIK:</strong> " + (props['tsp — pe'] || '-');
+                layer.bindTooltip(tooltipContent, { sticky: true, className: 'custom-tooltip' });
+
+                layer.on('click', function() {
+                    updateDashboard(props);
+                    highlightFeature(layer);
+                });
             }
         }).addTo(map);
 
-        // 3. Automatik masukkan No Lot ke dalam Dropdown Sidebar
+        // Isi Dropdown
         var select = document.getElementById("selectLot");
-        // Gunakan data dari lotfinaltest_2 untuk senarai nombor
-        var features = json_lotfinaltest_2.features;
-        features.sort((a, b) => (a.properties.NO_LOT > b.properties.NO_LOT) ? 1 : -1);
-
-        features.forEach(function(f) {
-            if (f.properties.NO_LOT) {
-                var option = document.createElement("option");
-                option.text = f.properties.NO_LOT;
-                option.value = f.properties.NO_LOT;
-                select.add(option);
+        json_lotfinaltest_2.features.forEach(f => {
+            if(f.properties.NO_LOT) {
+                var opt = document.createElement("option");
+                opt.value = f.properties.NO_LOT;
+                opt.text = f.properties.NO_LOT;
+                select.add(opt);
             }
         });
 
-        // 4. Fungsi Zoom bila No Lot dipilih dari dropdown
-        function zoomToLot(lotNo) {
-            if (!lotNo) return;
+        function updateDashboard(props) {
+            document.getElementById('val-lot').innerText = props.NO_LOT || '-';
+            document.getElementById('val-nama').innerText = props['tsp — pe'] || '-';
+            document.getElementById('val-luas').innerText = (props.AREA || '-') + " m²";
+        }
+
+        function highlightFeature(layer) {
+            layer_LOT_1.setStyle(defaultStyle);
+            layer.setStyle(highlightStyle);
+            map.fitBounds(layer.getBounds());
+        }
+
+        function doSearch() {
+            var val = select.value;
             layer_LOT_1.eachLayer(function(layer) {
-                if (layer.feature.properties.NO_LOT == lotNo) {
-                    map.fitBounds(layer.getBounds());
-                    layer.openPopup();
+                if (layer.feature.properties.NO_LOT == val) {
+                    highlightFeature(layer);
+                    updateDashboard(layer.feature.properties);
                 }
             });
         }
 
-        // Tambah Zoom Control di kiri atas
-        L.control.zoom({ position: 'topleft' }).addTo(map);
+        function resetMap() {
+            layer_LOT_1.setStyle(defaultStyle);
+            map.fitBounds(layer_LOT_1.getBounds());
+            document.getElementById('val-lot').innerText = '-';
+            document.getElementById('val-nama').innerText = '-';
+            document.getElementById('val-luas').innerText = '-';
+            select.value = "";
+        }
         </script>
     </body>
 </html>

@@ -11,26 +11,26 @@
                 background-color: #1a1c1e;
             }
 
-            /* Header Hijau LotFinder - SEKARANG CENTER */
+            /* Header Hijau LotFinder - CENTER */
             header {
-                height: 60px;
-                background-color: #2d5a27; 
-                display: flex; 
-                align-items: center; 
-                justify-content: center; /* Memusatkan tajuk ke tengah */
-                padding: 0 20px;
-                color: white; 
-                border-bottom: 2px solid #3d3d3d;
-                position: relative;
-            }
+    height: 60px;
+    background-color: #2d5a27; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; /* Memastikan h1 berada di tengah secara horizontal */
+    color: white; 
+    border-bottom: 2px solid #3d3d3d;
+    width: 100%; /* Pastikan header ambil ruang penuh skrin */
+}
 
-            header h1 {
-                font-family: "Times New Roman", Times, serif;
-                font-style: italic; 
-                font-size: 28px; 
-                margin: 0;
-                letter-spacing: 1px;
-            }
+header h1 {
+    font-family: "Times New Roman", Times, serif;
+    font-style: italic; 
+    font-size: 28px; 
+    margin: 0;
+    text-align: center; /* Tambahan keselamatan untuk center */
+    flex: 1; /* Memberi ruang penuh supaya text-align berfungsi */
+}
 
             #main-container { display: flex; flex: 1; width: 100%; height: calc(100% - 60px); }
 

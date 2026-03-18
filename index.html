@@ -4,118 +4,69 @@
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
-        <meta name="mobile-web-app-capable" content="yes">
-        <meta name="apple-mobile-web-app-capable" content="yes">
-        <link rel="stylesheet" href="css/leaflet.css">
-        <link rel="stylesheet" href="css/L.Control.Layers.Tree.css">
-        <link rel="stylesheet" href="css/qgis2web.css">
-        <link rel="stylesheet" href="css/fontawesome-all.min.css">
-        <link rel="stylesheet" href="css/leaflet-search.css">
-        <link rel="stylesheet" href="css/leaflet.photon.css">
         <style>
             html, body {
-                width: 100%;
-                height: 100%;
-                padding: 0;
-                margin: 0;
-                overflow: hidden;
-                display: flex;
-                flex-direction: column;
+                width: 100%; height: 100%; padding: 0; margin: 0;
+                overflow: hidden; display: flex; flex-direction: column;
                 background-color: #1a1c1e;
             }
 
-            /* Header Style */
+            /* Header Hijau LotFinder */
             header {
                 height: 60px;
-                background-color: #2d5a27; /* Hijau seperti gambar */
-                display: flex;
-                align-items: center;
-                padding: 0 20px;
-                color: white;
-                border-bottom: 2px solid #3d3d3d;
+                background-color: #2d5a27; 
+                display: flex; align-items: center; padding: 0 20px;
+                color: white; border-bottom: 2px solid #3d3d3d;
             }
 
             header h1 {
                 font-family: "Times New Roman", Times, serif;
-                font-style: italic;
-                font-size: 24px;
-                margin: 0;
-                margin-left: 10px;
+                font-style: italic; font-size: 26px; margin: 0;
             }
 
-            #main-container {
-                display: flex;
-                flex: 1;
-                width: 100%;
-                height: calc(100% - 60px);
-            }
+            #main-container { display: flex; flex: 1; width: 100%; height: calc(100% - 60px); }
 
-            #map {
-                flex: 1;
-                height: 100%;
-            }
+            #map { flex: 1; height: 100%; }
 
-            /* Sidebar Style (Dark Mode) */
+            /* Sidebar Dark Mode */
             #sidebar {
-                width: 300px;
-                background-color: #1a1c23;
-                color: #ffffff;
-                padding: 20px;
-                font-family: Arial, sans-serif;
-                border-left: 1px solid #333;
+                width: 320px; background-color: #1a1c23;
+                color: #ffffff; padding: 15px;
+                font-family: Arial, sans-serif; border-left: 1px solid #333;
                 overflow-y: auto;
             }
 
-            .sidebar-title {
-                font-size: 14px;
-                color: #bbb;
-                margin-bottom: 20px;
-                display: flex;
-                align-items: center;
-            }
+            .sidebar-title { font-size: 14px; color: #bbb; margin-bottom: 15px; }
 
             .info-box {
-                background-color: #252830;
-                padding: 15px;
-                border-radius: 8px;
-                margin-bottom: 10px;
-                border-left: 4px solid #2d5a27;
+                background-color: #252830; padding: 12px;
+                border-radius: 8px; margin-bottom: 10px;
+                border-left: 4px solid #4caf50;
             }
 
-            .info-label {
-                font-size: 11px;
-                color: #888;
-                text-transform: uppercase;
-                margin-bottom: 5px;
-            }
-
-            .info-value {
-                font-size: 16px;
-                font-weight: bold;
-                color: #4caf50; /* Warna hijau untuk value */
-            }
+            .info-label { font-size: 10px; color: #888; text-transform: uppercase; }
+            .info-value { font-size: 15px; font-weight: bold; color: #4caf50; margin-top: 4px; }
 
             .btn {
-                width: 100%;
-                padding: 10px;
-                margin-top: 5px;
-                border: none;
-                border-radius: 5px;
-                cursor: pointer;
-                font-weight: bold;
-                color: white;
+                width: 100%; padding: 10px; margin-top: 8px;
+                border: none; border-radius: 5px; cursor: pointer;
+                font-weight: bold; color: white;
             }
-
             .btn-search { background-color: #2d5a27; }
             .btn-reset { background-color: #c62828; }
             .btn-export { background-color: #0277bd; margin-top: 15px; }
 
+            input {
+                width: 93%; padding: 10px; border-radius: 4px;
+                border: none; background: #333; color: white; margin-bottom: 5px;
+            }
         </style>
+        <link rel="stylesheet" href="css/leaflet.css">
+        <link rel="stylesheet" href="css/leaflet-search.css">
         <title>LotFinder</title>
     </head>
     <body>
         <header>
-            <img src="https://via.placeholder.com/40x40" alt="Logo" style="border-radius:50%;"> 
             <h1>LotFinder</h1>
         </header>
 
@@ -123,120 +74,86 @@
             <div id="map"></div>
             
             <div id="sidebar">
-                <div class="sidebar-title">
-                    <i class="fa fa-cog"></i> &nbsp; Tetapan Paparan
-                </div>
-
+                <div class="sidebar-title">⚙️ Tetapan Paparan</div>
+                
                 <div style="margin-bottom: 20px;">
-                    <div class="info-label" style="color:white; margin-bottom:10px;">🌍 Land Explorer</div>
-                    <input type="text" id="searchInput" placeholder="Cari No Lot..." style="width:90%; padding:8px; border-radius:4px; border:none; background:#333; color:white;">
-                    <button class="btn btn-search">Cari Lot</button>
+                    <div style="color:white; margin-bottom:10px; font-size: 14px;">🌍 Land Explorer</div>
+                    <input type="text" id="inputSearch" placeholder="Masukkan No Lot...">
+                    <button class="btn btn-search" onclick="searchLot()">Cari Lot</button>
                     <button class="btn btn-reset" onclick="location.reload()">Reset Peta</button>
                     <button class="btn btn-export">📄 Export Detail + Map (PDF)</button>
                 </div>
 
                 <div class="info-box">
-                    <div class="info-label">Total Lot</div>
+                    <div class="info-label">TOTAL LOT</div>
                     <div class="info-value">67</div>
                 </div>
 
                 <div class="info-box">
-                    <div class="info-label">No Lot Dipilih</div>
+                    <div class="info-label">NO LOT DIPILIH</div>
                     <div id="side_no_lot" class="info-value">-</div>
                 </div>
 
                 <div class="info-box">
-                    <div class="info-label">Nama Pemilik</div>
+                    <div class="info-label">NAMA PEMILIK</div>
                     <div id="side_pemilik" class="info-value">-</div>
                 </div>
 
                 <div class="info-box">
-                    <div class="info-label">Luas Lot</div>
+                    <div class="info-label">LUAS LOT</div>
                     <div id="side_luas" class="info-value">-</div>
                 </div>
             </div>
         </div>
 
-        <script src="js/qgis2web_expressions.js"></script>
         <script src="js/leaflet.js"></script>
-        <script src="js/L.Control.Layers.Tree.min.js"></script>
-        <script src="js/leaflet.rotatedMarker.js"></script>
-        <script src="js/leaflet.pattern.js"></script>
-        <script src="js/leaflet-hash.js"></script>
-        <script src="js/Autolinker.min.js"></script>
-        <script src="js/rbush.min.js"></script>
-        <script src="js/labelgun.min.js"></script>
-        <script src="js/labels.js"></script>
-        <script src="js/leaflet.photon.js"></script>
-        <script src="js/leaflet-search.js"></script>
-        <script src="data/LOT_1.js"></script>
         <script src="data/lotfinal_2.js"></script>
-        <script src="data/TANDA_SEMPADAN_3.js"></script>
         
         <script>
-        var map = L.map('map', {
-            zoomControl:true, maxZoom:28, minZoom:1
-        }).fitBounds([[2.103071734769065,102.5210196581552],[2.104320052250617,102.52314267639126]]);
-        
-        var hash = new L.Hash(map);
-        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
-        
-        map.createPane('pane_GoogleSatelliteHybrid_0');
-        map.getPane('pane_GoogleSatelliteHybrid_0').style.zIndex = 400;
-        var layer_GoogleSatelliteHybrid_0 = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
-            pane: 'pane_GoogleSatelliteHybrid_0',
-            opacity: 1.0,
-            minZoom: 1,
-            maxZoom: 28,
-        }).addTo(map);
+            var map = L.map('map', {zoomControl: true}).fitBounds([[2.1030, 102.5210],[2.1043, 102.5231]]);
+            
+            L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}').addTo(map);
 
-        function pop_lotfinal_2(feature, layer) {
-            layer.on({
-                click: function(e) {
-                    // Update Sidebar secara automatik bila lot diklik
-                    document.getElementById('side_no_lot').innerText = feature.properties['NO_LOT'] || '-';
-                    document.getElementById('side_pemilik').innerText = feature.properties['tsp — pe'] || 'ALI BIN ABU'; // Contoh fallback jika null
-                    document.getElementById('side_luas').innerText = (feature.properties['AREA'] || '0') + " m²";
-                }
-            });
-        }
-
-        function style_lotfinal_2_0() {
-            return {
-                pane: 'pane_lotfinal_2',
-                opacity: 1,
-                color: 'rgba(255,255,255,0.5)',
-                weight: 1.0, 
-                fill: true,
-                fillOpacity: 0.6,
-                fillColor: 'rgba(76,175,80,1.0)', // Warna hijau lot
-                interactive: true,
+            // Fungsi untuk paparkan data ke sidebar
+            function updateSidebar(props) {
+                document.getElementById('side_no_lot').innerText = props.NO_LOT || '-';
+                document.getElementById('side_pemilik').innerText = props['tsp — pe'] || 'N/A';
+                document.getElementById('side_luas').innerText = props.AREA ? props.AREA + " m²" : '-';
             }
-        }
 
-        map.createPane('pane_lotfinal_2');
-        map.getPane('pane_lotfinal_2').style.zIndex = 402;
-        var layer_lotfinal_2 = new L.geoJson(json_lotfinal_2, {
-            pane: 'pane_lotfinal_2',
-            onEachFeature: pop_lotfinal_2,
-            style: style_lotfinal_2_0,
-        }).addTo(map);
+            // Style Hijau untuk setiap lot (seperti dalam gambar)
+            function styleLot(feature) {
+                return {
+                    fillColor: '#4caf50', // Warna Hijau
+                    weight: 1.5,
+                    opacity: 1,
+                    color: 'white', // Garisan putih halus antara lot
+                    fillOpacity: 0.5 // Ketelusan supaya nampak satelit di bawah
+                };
+            }
 
-        // Fungsi Search
-        var searchControl = new L.Control.Search({
-            layer: layer_lotfinal_2,
-            initial: false,
-            hideMarkerOnCollapse: true,
-            propertyName: 'NO_LOT'
-        });
-        
-        searchControl.on('search:locationfound', function(e) {
-            document.getElementById('side_no_lot').innerText = e.layer.feature.properties['NO_LOT'];
-            document.getElementById('side_pemilik').innerText = e.layer.feature.properties['tsp — pe'];
-            document.getElementById('side_luas').innerText = e.layer.feature.properties['AREA'] + " m²";
-        });
+            var layer_lot = L.geoJson(json_lotfinal_2, {
+                style: styleLot,
+                onEachFeature: function(feature, layer) {
+                    layer.on('click', function() {
+                        // Highlight lot yang diklik
+                        layer_lot.setStyle(styleLot); 
+                        layer.setStyle({fillColor: '#ffeb3b', fillOpacity: 0.8}); // Tukar kuning bila diklik
+                        updateSidebar(feature.properties);
+                    });
+                }
+            }).addTo(map);
 
-        map.addControl(searchControl);
+            function searchLot() {
+                var val = document.getElementById('inputSearch').value;
+                layer_lot.eachLayer(function(layer) {
+                    if (layer.feature.properties.NO_LOT == val) {
+                        map.fitBounds(layer.getBounds());
+                        layer.setStyle({fillColor: '#ffeb3b', fillOpacity: 0.8});
+                        updateSidebar(layer.feature.properties);
+                    }
+                });
+            }
         </script>
     </body>
 </html>
